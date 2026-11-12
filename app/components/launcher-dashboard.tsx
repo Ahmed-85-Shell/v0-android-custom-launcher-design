@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -195,17 +195,25 @@ function PrayerWidget() {
 }
 
 function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (label: string) => void }) {
-  const now = new Date()
-  const hour = now.getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const [now, setNow] = useState<Date | null>(null)
+
+  useEffect(() => {
+    const updateTime = () => setNow(new Date())
+    updateTime()
+    const interval = window.setInterval(updateTime, 60_000)
+    return () => window.clearInterval(interval)
+  }, [])
+
+  const hour = now?.getHours()
+  const greeting = hour === undefined ? 'Good day' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   return (
     <>
       <SideRail onOpen={onOpen} />
       <main className="home-layout">
         <section className="hero-copy">
           <p className="eyebrow">NOZHA SCHOOLS <span>·</span> CAIRO</p>
-          <div className="time-display" aria-label={now.toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' })}>
-            {now.toLocaleTimeString('en-EG', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(' ', '')}
+          <div className="time-display" aria-label={now ? now.toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' }) : 'Current local time'}>
+            {now ? now.toLocaleTimeString('en-EG', { hour: '2-digit', minute: '2-digit', hour12: true }).replace(' ', '') : '--:--'}
           </div>
           <div className="hero-divider" />
           <div className="weather-line"><Sun size={20} /><strong>24°</strong><span>Sunny · Cairo</span></div>
