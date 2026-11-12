@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import {
   ArrowDownRight,
   ArrowRight,
-  BookOpen,
   BusFront,
   Check,
   CircleHelp,
@@ -55,8 +54,7 @@ function TopBar({ view, setView }: { view: View; setView: (view: View) => void }
   return (
     <header className="topbar glass-panel">
       <button className="brand" onClick={() => setView('Home')} aria-label="Nozha Launcher home">
-        <span className="brand-seal"><BookOpen size={17} /></span>
-        <span className="brand-name">NOZHA<small>LAUNCHER</small></span>
+        <img className="brand-lockup" src="/nozha-launcher-lockup.png" alt="Nozha school crest and launcher wordmark" />
       </button>
       <nav className="topnav" aria-label="Main navigation">
         {(['Home', 'All apps', 'Students'] as View[]).map((item) => (
@@ -146,38 +144,31 @@ function StudentWidget({ onOpen }: { onOpen: () => void }) {
 
 const timetableIcons = [Flag, Sigma, Languages, FlaskConical, Coffee, Languages, Globe2, MoonStar, Monitor, Palette]
 
-function TimetableDialog({ onClose }: { onClose: () => void }) {
+function FullTimetable({ hidden }: { hidden: boolean }) {
   return (
-    <div className="notice-backdrop timetable-backdrop" role="presentation" onClick={onClose}>
-      <section className="timetable-dialog glass-panel" role="dialog" aria-modal="true" aria-labelledby="timetable-title" onClick={(event) => event.stopPropagation()}>
-        <div className="timetable-dialog-heading">
-          <h2 id="timetable-title">Today&apos;s timetable</h2>
-          <button className="dialog-close" onClick={onClose} aria-label="Close timetable"><X size={18} /></button>
-        </div>
-        <div className="full-timetable">
-          {sampleTimetable.map((item, index) => {
-            const Icon = timetableIcons[index]
-            return <div className="timetable-row" key={item.time}>
-              <Icon className="timetable-row-icon" size={17} aria-hidden="true" />
-              <span className="timetable-subject">{item.subject}</span>
-              <time>{item.time}</time>
-            </div>
-          })}
-        </div>
-        <p className="sample-note">Example schedule — connect a school timetable source for live data.</p>
-      </section>
-    </div>
+    <span className="full-timetable" id="full-timetable-list" aria-label="Today&apos;s full timetable" hidden={hidden}>
+      {sampleTimetable.map((item, index) => {
+        const Icon = timetableIcons[index]
+        return <span className="timetable-row" key={item.time}>
+          <Icon className="timetable-row-icon" size={16} aria-hidden="true" />
+          <span className="timetable-subject">{item.subject}</span>
+          <time>{item.time}</time>
+        </span>
+      })}
+    </span>
   )
 }
 
-function TimetableWidget({ onOpen }: { onOpen: () => void }) {
+function TimetableWidget() {
+  const [expanded, setExpanded] = useState(false)
+
   return (
-    <button className="timetable-widget glass-panel" onClick={onOpen} aria-label="Open the full timetable">
-      <div className="widget-heading"><span>TODAY&apos;S TIMETABLE</span><span className="live-pill"><i /> Sample</span></div>
-      <span className="timetable-meta"><span>{classInfo.grade} · {classInfo.division}</span><span>Room 214</span></span>
+    <button className={`timetable-widget glass-panel ${expanded ? 'expanded' : 'compact'}`} onClick={() => setExpanded((current) => !current)} aria-expanded={expanded} aria-controls="full-timetable-list" aria-label={expanded ? 'Collapse full timetable' : 'Expand full timetable'}>
+      <span className="widget-heading"><span>TODAY&apos;S TIMETABLE</span><span className="live-pill"><i /> Sample</span></span>
       <span className="next-class"><span className="next-icon"><ArrowRight size={18} /></span><span><span>UP NEXT · {sampleTimetable[0].time}</span><strong>{sampleTimetable[0].subject}</strong><small>{sampleTimetable[0].room}</small></span></span>
-      <span className="timetable-mini">{sampleTimetable.slice(1, 3).map((item) => <span key={item.time}><span>{item.time.split(' – ')[0]}</span><span>{item.subject}</span></span>)}</span>
-      <span className="widget-footer">View full timetable <ArrowRight size={14} /></span>
+      <FullTimetable hidden={!expanded} />
+      {expanded && <span className="sample-note">Example schedule — connect a school timetable source for live data.</span>}
+      <span className="widget-footer">{expanded ? 'Collapse timetable' : 'View full timetable'} <ArrowRight size={14} /></span>
     </button>
   )
 }
@@ -203,7 +194,7 @@ function PrayerWidget() {
   )
 }
 
-function HomePage({ onStudents, onOpen, onTimetable }: { onStudents: () => void; onOpen: (label: string) => void; onTimetable: () => void }) {
+function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (label: string) => void }) {
   const now = new Date()
   const hour = now.getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -225,7 +216,7 @@ function HomePage({ onStudents, onOpen, onTimetable }: { onStudents: () => void;
         </section>
         <aside className="home-widgets" aria-label="Classroom widgets">
           <PrayerWidget />
-          <TimetableWidget onOpen={onTimetable} />
+          <TimetableWidget />
           <StudentWidget onOpen={onStudents} />
         </aside>
       </main>
@@ -245,7 +236,6 @@ function AppNotice({ app, onClose }: { app: string; onClose: () => void }) {
 export default function LauncherDashboard() {
   const [view, setView] = useState<View>('Home')
   const [notice, setNotice] = useState<string | null>(null)
-  const [timetableOpen, setTimetableOpen] = useState(false)
   const open = (label: string) => {
     if (label === 'Students') { setView('Students'); return }
     setNotice(label)
@@ -253,7 +243,7 @@ export default function LauncherDashboard() {
   const page = useMemo(() => {
     if (view === 'Students') return <StudentsPage />
     if (view === 'All apps') return <AppsPage onOpen={open} />
-    return <HomePage onStudents={() => setView('Students')} onOpen={open} onTimetable={() => setTimetableOpen(true)} />
+    return <HomePage onStudents={() => setView('Students')} onOpen={open} />
   }, [view])
 
   return (
@@ -263,7 +253,6 @@ export default function LauncherDashboard() {
       <TopBar view={view} setView={setView} />
       {page}
       {notice && <AppNotice app={notice} onClose={() => setNotice(null)} />}
-      {timetableOpen && <TimetableDialog onClose={() => setTimetableOpen(false)} />}
     </div>
   )
 }
