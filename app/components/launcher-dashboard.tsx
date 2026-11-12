@@ -9,8 +9,16 @@ import {
   Check,
   CircleHelp,
   Clock3,
+  Coffee,
   Expand,
+  FlaskConical,
+  Flag,
   Globe2,
+  Languages,
+  MoonStar,
+  Monitor,
+  Palette,
+  Sigma,
   LayoutGrid,
   MonitorUp,
   Moon,
@@ -35,7 +43,7 @@ const tools = [
   { label: 'Help', detail: 'Quick help', icon: CircleHelp, color: 'mint' },
 ]
 
-function Flag({ language }: { language: Student['secondLanguage'] }) {
+function LanguageFlag({ language }: { language: Student['secondLanguage'] }) {
   return (
     <span className={`flag flag-${language === 'French' ? 'fr' : 'de'}`} aria-label={language} title={language}>
       <span className="sr-only">{language}</span>
@@ -75,7 +83,7 @@ function SideRail({ onOpen }: { onOpen: (label: string) => void }) {
 }
 
 function LanguageChip({ language }: { language: Student['secondLanguage'] }) {
-  return <span className="language-chip"><Flag language={language} /><span>{language}</span></span>
+  return <span className="language-chip"><LanguageFlag language={language} /><span>{language}</span></span>
 }
 
 function StudentsTable({ query }: { query: string }) {
@@ -136,19 +144,66 @@ function StudentWidget({ onOpen }: { onOpen: () => void }) {
   )
 }
 
-function TimetableWidget() {
+const timetableIcons = [Flag, Sigma, Languages, FlaskConical, Coffee, Languages, Globe2, MoonStar, Monitor, Palette]
+
+function TimetableDialog({ onClose }: { onClose: () => void }) {
   return (
-    <section className="timetable-widget glass-panel">
-      <div className="widget-heading"><span>TODAY&apos;S TIMETABLE</span><span className="live-pill"><i /> Sample</span></div>
-      <div className="timetable-meta"><span>{classInfo.grade} · {classInfo.division}</span><span>Room 214</span></div>
-      <div className="next-class"><div className="next-icon"><ArrowRight size={18} /></div><div><span>UP NEXT · {sampleTimetable[0].time}</span><strong>{sampleTimetable[0].subject}</strong><small>{sampleTimetable[0].room}</small></div></div>
-      <div className="timetable-mini">{sampleTimetable.slice(1, 3).map((item) => <div key={item.time}><span>{item.time}</span><span>{item.subject}</span></div>)}</div>
-      <p className="sample-note">Example schedule — connect a school timetable source for live data.</p>
-    </section>
+    <div className="notice-backdrop timetable-backdrop" role="presentation" onClick={onClose}>
+      <section className="timetable-dialog glass-panel" role="dialog" aria-modal="true" aria-labelledby="timetable-title" onClick={(event) => event.stopPropagation()}>
+        <div className="timetable-dialog-heading">
+          <h2 id="timetable-title">Today&apos;s timetable</h2>
+          <button className="dialog-close" onClick={onClose} aria-label="Close timetable"><X size={18} /></button>
+        </div>
+        <div className="full-timetable">
+          {sampleTimetable.map((item, index) => {
+            const Icon = timetableIcons[index]
+            return <div className="timetable-row" key={item.time}>
+              <Icon className="timetable-row-icon" size={17} aria-hidden="true" />
+              <span className="timetable-subject">{item.subject}</span>
+              <time>{item.time}</time>
+            </div>
+          })}
+        </div>
+        <p className="sample-note">Example schedule — connect a school timetable source for live data.</p>
+      </section>
+    </div>
   )
 }
 
-function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (label: string) => void }) {
+function TimetableWidget({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button className="timetable-widget glass-panel" onClick={onOpen} aria-label="Open the full timetable">
+      <div className="widget-heading"><span>TODAY&apos;S TIMETABLE</span><span className="live-pill"><i /> Sample</span></div>
+      <span className="timetable-meta"><span>{classInfo.grade} · {classInfo.division}</span><span>Room 214</span></span>
+      <span className="next-class"><span className="next-icon"><ArrowRight size={18} /></span><span><span>UP NEXT · {sampleTimetable[0].time}</span><strong>{sampleTimetable[0].subject}</strong><small>{sampleTimetable[0].room}</small></span></span>
+      <span className="timetable-mini">{sampleTimetable.slice(1, 3).map((item) => <span key={item.time}><span>{item.time.split(' – ')[0]}</span><span>{item.subject}</span></span>)}</span>
+      <span className="widget-footer">View full timetable <ArrowRight size={14} /></span>
+    </button>
+  )
+}
+
+function PrayerWidget() {
+  const [expanded, setExpanded] = useState(false)
+  const prayers = [
+    { name: 'Fajr', time: '04:48' },
+    { name: 'Dhuhr', time: '11:41' },
+    { name: 'Asr', time: '14:39' },
+    { name: 'Maghrib', time: '17:02' },
+    { name: 'Isha', time: '18:20' },
+  ]
+
+  return (
+    <button className={`prayer-widget glass-panel ${expanded ? 'expanded' : 'compact'}`} onClick={() => setExpanded((current) => !current)} aria-expanded={expanded} aria-label={expanded ? 'Collapse prayer times' : 'Expand prayer times'}>
+      <span className="prayer-topline"><span>NEXT PRAYER · CAIRO</span><span className="hijri-date"><Moon size={12} /> Jum. II, 1448</span></span>
+      <span className="prayer-main"><span><strong>Dhuhr</strong><small lang="ar" dir="rtl">الظهر</small></span><span className="prayer-time">11:41 AM</span></span>
+      {expanded && <span className="prayer-list" aria-label="Prayer times">
+        {prayers.map((prayer) => <span className={`prayer-time-cell ${prayer.name === 'Dhuhr' ? 'current' : ''}`} key={prayer.name}><small>{prayer.name}</small><strong>{prayer.time}</strong></span>)}
+      </span>}
+    </button>
+  )
+}
+
+function HomePage({ onStudents, onOpen, onTimetable }: { onStudents: () => void; onOpen: (label: string) => void; onTimetable: () => void }) {
   const now = new Date()
   const hour = now.getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -169,8 +224,8 @@ function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (lab
           <div className="gesture-hints"><span><ArrowDownRight size={14} /> Swipe up · App drawer</span><span><MonitorUp size={14} /> Share your screen</span><span><Sparkles size={14} /> Personalize the launcher</span></div>
         </section>
         <aside className="home-widgets" aria-label="Classroom widgets">
-          <section className="prayer-widget glass-panel"><div className="widget-heading"><span>CAIRO PRAYER TIMES · SAMPLE</span><button aria-label="Prayer settings"><Moon size={14} /></button></div><div className="prayer-content"><div><strong>12:08</strong><span>Dhuhr</span></div><div className="prayer-status">Next prayer <b>in 42 min</b></div></div></section>
-          <TimetableWidget />
+          <PrayerWidget />
+          <TimetableWidget onOpen={onTimetable} />
           <StudentWidget onOpen={onStudents} />
         </aside>
       </main>
@@ -190,6 +245,7 @@ function AppNotice({ app, onClose }: { app: string; onClose: () => void }) {
 export default function LauncherDashboard() {
   const [view, setView] = useState<View>('Home')
   const [notice, setNotice] = useState<string | null>(null)
+  const [timetableOpen, setTimetableOpen] = useState(false)
   const open = (label: string) => {
     if (label === 'Students') { setView('Students'); return }
     setNotice(label)
@@ -197,7 +253,7 @@ export default function LauncherDashboard() {
   const page = useMemo(() => {
     if (view === 'Students') return <StudentsPage />
     if (view === 'All apps') return <AppsPage onOpen={open} />
-    return <HomePage onStudents={() => setView('Students')} onOpen={open} />
+    return <HomePage onStudents={() => setView('Students')} onOpen={open} onTimetable={() => setTimetableOpen(true)} />
   }, [view])
 
   return (
@@ -207,6 +263,7 @@ export default function LauncherDashboard() {
       <TopBar view={view} setView={setView} />
       {page}
       {notice && <AppNotice app={notice} onClose={() => setNotice(null)} />}
+      {timetableOpen && <TimetableDialog onClose={() => setTimetableOpen(false)} />}
     </div>
   )
 }

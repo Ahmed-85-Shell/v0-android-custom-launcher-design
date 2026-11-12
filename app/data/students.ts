@@ -44,8 +44,14 @@ export const students: Student[] = [
 ]
 
 export const sampleTimetable = [
-  { time: '08:00', subject: 'Arabic', room: 'Room 214' },
-  { time: '08:45', subject: 'Mathematics', room: 'Room 214' },
-  { time: '09:30', subject: 'English', room: 'Room 214' },
-  { time: '10:15', subject: 'Science', room: 'Lab 2' },
+  { time: '07:45 – 08:00', subject: 'Morning Assembly', room: 'School yard' },
+  { time: '08:00 – 08:45', subject: 'Mathematics', room: 'Room 214' },
+  { time: '08:45 – 09:30', subject: 'English Language', room: 'Room 214' },
+  { time: '09:30 – 10:15', subject: 'Science', room: 'Lab 2' },
+  { time: '10:15 – 10:35', subject: 'Break', room: 'Courtyard' },
+  { time: '10:35 – 11:20', subject: 'Arabic', room: 'Room 214' },
+  { time: '11:20 – 12:05', subject: 'Social Studies', room: 'Room 214' },
+  { time: '12:05 – 12:35', subject: 'Dhuhr Prayer & Lunch', room: 'Prayer room' },
+  { time: '12:35 – 13:20', subject: 'ICT', room: 'Computer lab' },
+  { time: '13:20 – 14:05', subject: 'Art & Design', room: 'Art room' },
 ]
