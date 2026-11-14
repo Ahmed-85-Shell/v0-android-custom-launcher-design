@@ -10,7 +10,7 @@ export const classInfo = {
   school: 'Nozha Schools',
   location: 'Cairo, Egypt',
   grade: 'Primary 4',
-  division: 'Boys',
+  className: 'B',
   schoolYear: '2026 / 2027',
 }
 

@@ -44,7 +44,7 @@ const tools = [
 
 function LanguageFlag({ language }: { language: Student['secondLanguage'] }) {
   return (
-    <span className={`flag flag-${language === 'French' ? 'fr' : 'de'}`} aria-label={language} title={language}>
+    <span className={`flag flag-${language === 'French' ? 'fr' : 'de'}`} role="img" aria-label={language} title={language}>
       <span className="sr-only">{language}</span>
     </span>
   )
@@ -68,9 +68,9 @@ function TopBar({ view, setView }: { view: View; setView: (view: View) => void }
   )
 }
 
-function SideRail({ onOpen }: { onOpen: (label: string) => void }) {
+function SideRail({ onOpen, hidden = false }: { onOpen: (label: string) => void; hidden?: boolean }) {
   return (
-    <aside className="side-rail glass-panel" aria-label="Quick apps">
+    <aside className="side-rail glass-panel" aria-label="Quick apps" hidden={hidden}>
       {tools.map(({ label, icon: Icon }) => (
         <button className="rail-button" key={label} onClick={() => onOpen(label)}>
           <Icon size={21} strokeWidth={1.8} /><span>{label}</span>
@@ -80,11 +80,7 @@ function SideRail({ onOpen }: { onOpen: (label: string) => void }) {
   )
 }
 
-function LanguageChip({ language }: { language: Student['secondLanguage'] }) {
-  return <span className="language-chip"><LanguageFlag language={language} /><span>{language}</span></span>
-}
-
-function StudentsTable({ query }: { query: string }) {
+function StudentsTable({ query = '' }: { query?: string }) {
   const filtered = students.filter((student) => {
     const value = `${student.englishName} ${student.arabicName} ${student.secondLanguage}`.toLowerCase()
     return value.includes(query.toLowerCase())
@@ -93,14 +89,14 @@ function StudentsTable({ query }: { query: string }) {
   return (
     <div className="table-wrap">
       <table className="student-table">
-        <thead><tr><th>#</th><th>Arabic name</th><th>English name</th><th>2nd language</th><th>Bus</th></tr></thead>
+        <thead><tr><th scope="col">#</th><th scope="col">Arabic name</th><th scope="col">English name</th><th scope="col">2nd language</th><th scope="col">Bus</th></tr></thead>
         <tbody>{filtered.map((student) => (
           <tr key={student.id}>
             <td className="row-number">{String(student.id).padStart(2, '0')}</td>
             <td className="arabic-cell" lang="ar" dir="rtl">{student.arabicName}</td>
             <td className="english-cell">{student.englishName}</td>
-            <td><LanguageChip language={student.secondLanguage} /></td>
-            <td>{student.bus ? <span className="bus-cell"><BusFront size={16} /> Assigned</span> : <span className="no-bus">—</span>}</td>
+            <td className="language-icon-cell"><LanguageFlag language={student.secondLanguage} /></td>
+            <td className="bus-icon-cell"><span className={`bus-status-icon ${student.bus ? 'assigned' : 'unassigned'}`} role="img" aria-label={student.bus ? 'Bus assigned' : 'No bus assigned'} title={student.bus ? 'Bus assigned' : 'No bus assigned'}><BusFront size={17} aria-hidden="true" /></span></td>
           </tr>
         ))}</tbody>
       </table>
@@ -119,7 +115,7 @@ function StudentsPage() {
         <span className="source-pill"><Check size={14} /> PDF register · {classInfo.schoolYear}</span>
       </div>
       <div className="class-summary">
-        <div className="class-summary-main"><div className="class-icon"><UsersRound size={20} /></div><div><span className="class-name">{classInfo.grade} · {classInfo.division}</span><span className="class-school">{classInfo.school} · {classInfo.location}</span></div></div>
+        <div className="class-summary-main"><div className="class-icon"><UsersRound size={20} /></div><div><span className="class-name">{classInfo.grade} · Class {classInfo.className}</span><span className="class-school">{classInfo.school} · {classInfo.location}</span></div></div>
         <div className="summary-stat"><strong>{students.length}</strong><span>Students</span></div>
         <div className="summary-stat"><strong>{busCount}</strong><span>Bus assigned</span></div>
         <div className="summary-stat language-stat"><strong>FR · DE</strong><span>Second languages</span></div>
@@ -131,14 +127,21 @@ function StudentsPage() {
   )
 }
 
-function StudentWidget({ onOpen }: { onOpen: () => void }) {
+function StudentWidget({ expanded, onToggle }: { expanded: boolean; onToggle: () => void }) {
   return (
-    <button className="student-widget glass-panel" onClick={onOpen} aria-label={`Open ${students.length} student records for ${classInfo.grade} ${classInfo.division}`}>
-      <div className="widget-heading"><span>CLASS REGISTER</span><span className="student-count"><UsersRound size={14} />{students.length}</span></div>
-      <strong>{classInfo.grade} · {classInfo.division}</strong>
-      <span className="widget-school">{classInfo.school} · {classInfo.location}</span>
-      <span className="widget-footer">View all {students.length} students <ArrowRight size={14} /></span>
-    </button>
+    <section className={`student-widget glass-panel ${expanded ? 'expanded' : ''}`}>
+      <button className="student-widget-trigger" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls="student-widget-table" aria-label={expanded ? 'Collapse student list' : `Expand all ${students.length} students`}>
+        <span className="student-widget-copy">
+          <span className="widget-heading"><span>CLASS REGISTER</span><span className="student-count"><UsersRound size={14} />{students.length}</span></span>
+          <strong className="student-widget-title"><span>Grade: {classInfo.grade}</span><span>Class {classInfo.className}</span></strong>
+          <span className="student-widget-year">Academic year {classInfo.schoolYear}</span>
+        </span>
+        <span className="student-widget-action"><span>{expanded ? 'Collapse list' : `View all ${students.length} students`}</span><ArrowRight size={15} aria-hidden="true" /></span>
+      </button>
+      <div className="student-widget-table" id="student-widget-table" role="region" aria-label={`Student list for ${classInfo.grade}, Class ${classInfo.className}, academic year ${classInfo.schoolYear}`} hidden={!expanded}>
+        <StudentsTable />
+      </div>
+    </section>
   )
 }
 
@@ -194,8 +197,9 @@ function PrayerWidget() {
   )
 }
 
-function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (label: string) => void }) {
+function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
   const [now, setNow] = useState<Date | null>(null)
+  const [studentsExpanded, setStudentsExpanded] = useState(false)
 
   useEffect(() => {
     const updateTime = () => setNow(new Date())
@@ -208,8 +212,8 @@ function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (lab
   const greeting = hour === undefined ? 'Good day' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   return (
     <>
-      <SideRail onOpen={onOpen} />
-      <main className="home-layout">
+      <SideRail onOpen={onOpen} hidden={studentsExpanded} />
+      <main className={`home-layout ${studentsExpanded ? 'student-list-expanded' : ''}`}>
         <section className="hero-copy">
           <p className="eyebrow">NOZHA SCHOOLS <span>·</span> CAIRO</p>
           <div className="time-display" aria-label={now ? now.toLocaleTimeString('en-EG', { hour: 'numeric', minute: '2-digit' }) : 'Current local time'}>
@@ -223,9 +227,8 @@ function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (lab
           <div className="gesture-hints"><span><ArrowDownRight size={14} /> Swipe up · App drawer</span><span><MonitorUp size={14} /> Share your screen</span><span><Sparkles size={14} /> Personalize the launcher</span></div>
         </section>
         <aside className="home-widgets" aria-label="Classroom widgets">
-          <PrayerWidget />
-          <TimetableWidget />
-          <StudentWidget onOpen={onStudents} />
+          {!studentsExpanded && <><PrayerWidget /><TimetableWidget /></>}
+          <StudentWidget expanded={studentsExpanded} onToggle={() => setStudentsExpanded((current) => !current)} />
         </aside>
       </main>
     </>
@@ -233,7 +236,7 @@ function HomePage({ onStudents, onOpen }: { onStudents: () => void; onOpen: (lab
 }
 
 function AppsPage({ onOpen }: { onOpen: (label: string) => void }) {
-  return <section className="apps-page glass-panel"><p className="eyebrow">NOZHA LAUNCHER</p><h1>All apps</h1><p className="subheading">Your classroom tools, ready to launch.</p><div className="apps-grid">{tools.map(({ label, detail, icon: Icon, color }) => <button className="app-tile" key={label} onClick={() => onOpen(label)}><span className={`app-icon ${color}`}><Icon size={22} /></span><span><strong>{label}</strong><small>{detail}</small></span><ArrowRight className="app-arrow" size={16} /></button>)}</div><button className="app-tile students-tile" onClick={() => onOpen('Students')}><span className="app-icon mint"><UsersRound size={22} /></span><span><strong>Students</strong><small>{students.length} records · {classInfo.grade} {classInfo.division}</small></span><ArrowRight className="app-arrow" size={16} /></button></section>
+  return <section className="apps-page glass-panel"><p className="eyebrow">NOZHA LAUNCHER</p><h1>All apps</h1><p className="subheading">Your classroom tools, ready to launch.</p><div className="apps-grid">{tools.map(({ label, detail, icon: Icon, color }) => <button className="app-tile" key={label} onClick={() => onOpen(label)}><span className={`app-icon ${color}`}><Icon size={22} /></span><span><strong>{label}</strong><small>{detail}</small></span><ArrowRight className="app-arrow" size={16} /></button>)}</div><button className="app-tile students-tile" onClick={() => onOpen('Students')}><span className="app-icon mint"><UsersRound size={22} /></span><span><strong>Students</strong><small>{students.length} records · {classInfo.grade} Class {classInfo.className}</small></span><ArrowRight className="app-arrow" size={16} /></button></section>
 }
 
 function AppNotice({ app, onClose }: { app: string; onClose: () => void }) {
@@ -251,7 +254,7 @@ export default function LauncherDashboard() {
   const page = useMemo(() => {
     if (view === 'Students') return <StudentsPage />
     if (view === 'All apps') return <AppsPage onOpen={open} />
-    return <HomePage onStudents={() => setView('Students')} onOpen={open} />
+    return <HomePage onOpen={open} />
   }, [view])
 
   return (
