@@ -272,42 +272,75 @@ button{color:inherit}
 }
 
 .student-widget-table .student-table {
-  min-width: 700px;
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
 }
 
 .student-widget-table .student-table th {
-  height: 38px;
-  padding: 0 14px;
-  font-size: 11px;
+  height: 22px;
+  padding: 2px 3px;
+  font-size: 7px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .student-widget-table .student-table td {
-  height: 42px;
-  padding: 5px 14px;
-  font-size: 13px;
-  line-height: 1.4;
+  height: 25px;
+  padding: 2px 3px;
+  font-size: 8px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
+.student-widget-table .student-table th:nth-child(1),
 .student-widget-table .row-number {
-  width: 48px;
-  font-size: 11px;
+  width: 8%;
+  font-size: 7px;
+}
+
+.student-widget-table .student-table th:nth-child(2),
+.student-widget-table .student-table th:nth-child(3) {
+  width: 37%;
 }
 
 .student-widget-table .arabic-cell {
-  min-width: 230px;
-  font-size: 15px !important;
-  line-height: 1.6 !important;
+  min-width: 0;
+  font-size: 9px !important;
+  line-height: 1.2 !important;
 }
 
 .student-widget-table .english-cell {
-  min-width: 250px;
-  font-size: 13px;
+  min-width: 0;
+  font-size: 8px;
 }
 
+.student-widget-table .student-table th:nth-child(4),
+.student-widget-table .student-table th:nth-child(5),
 .student-widget-table .language-icon-cell,
 .student-widget-table .bus-icon-cell {
-  width: 80px;
+  width: 9%;
+  padding-right: 1px;
+  padding-left: 1px;
   text-align: center;
+}
+
+.student-widget-table .bus-status-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+}
+
+.student-widget-table .bus-status-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.student-widget-table .flag {
+  width: 16px;
+  height: 11px;
+  flex-basis: 16px;
+  border-radius: 2px;
 }
 
 .student-widget-table .flag {
@@ -394,31 +427,31 @@ button{color:inherit}
   }
 
   .student-widget-table .student-table {
-    min-width: 680px;
+    min-width: 0;
   }
 
   .student-widget-table .student-table th {
-    font-size: 9px;
+    font-size: 7px;
   }
 
   .student-widget-table .student-table td {
-    height: 38px;
-    padding: 4px 9px;
-    font-size: 11px;
+    height: 25px;
+    padding: 2px 3px;
+    font-size: 8px;
   }
 
   .student-widget-table .arabic-cell {
-    min-width: 180px;
-    font-size: 13px !important;
+    min-width: 0;
+    font-size: 9px !important;
   }
 
   .student-widget-table .english-cell {
-    min-width: 210px;
-    font-size: 11px;
+    min-width: 0;
+    font-size: 8px;
   }
 
   .student-widget-table .language-icon-cell,
   .student-widget-table .bus-icon-cell {
-    width: 72px;
+    width: 9%;
   }
 }
