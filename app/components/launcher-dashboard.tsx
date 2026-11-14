@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -127,9 +127,9 @@ function StudentsPage() {
   )
 }
 
-function StudentWidget({ expanded, onToggle }: { expanded: boolean; onToggle: () => void }) {
+function StudentWidget({ expanded, onToggle, widgetRef }: { expanded: boolean; onToggle: () => void; widgetRef: RefObject<HTMLElement | null> }) {
   return (
-    <section className={`student-widget glass-panel ${expanded ? 'expanded' : ''}`}>
+    <section ref={widgetRef} className={`student-widget glass-panel ${expanded ? 'expanded' : ''}`}>
       <button className="student-widget-trigger" type="button" onClick={onToggle} aria-expanded={expanded} aria-controls="student-widget-table" aria-label={expanded ? 'Collapse student list' : `Expand all ${students.length} students`}>
         <span className="student-widget-copy">
           <span className="widget-heading"><span>CLASS REGISTER</span><span className="student-count"><UsersRound size={14} />{students.length}</span></span>
@@ -200,6 +200,7 @@ function PrayerWidget() {
 function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
   const [now, setNow] = useState<Date | null>(null)
   const [studentsExpanded, setStudentsExpanded] = useState(false)
+  const studentWidgetRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const updateTime = () => setNow(new Date())
@@ -207,6 +208,17 @@ function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
     const interval = window.setInterval(updateTime, 60_000)
     return () => window.clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!studentsExpanded) return
+    const collapseOnOutsidePointer = (event: PointerEvent) => {
+      if (!studentWidgetRef.current?.contains(event.target as Node)) {
+        setStudentsExpanded(false)
+      }
+    }
+    document.addEventListener('pointerdown', collapseOnOutsidePointer)
+    return () => document.removeEventListener('pointerdown', collapseOnOutsidePointer)
+  }, [studentsExpanded])
 
   const hour = now?.getHours()
   const greeting = hour === undefined ? 'Good day' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -228,7 +240,7 @@ function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
         </section>
         <aside className="home-widgets" aria-label="Classroom widgets">
           {!studentsExpanded && <><PrayerWidget /><TimetableWidget /></>}
-          <StudentWidget expanded={studentsExpanded} onToggle={() => setStudentsExpanded((current) => !current)} />
+          <StudentWidget expanded={studentsExpanded} onToggle={() => setStudentsExpanded((current) => !current)} widgetRef={studentWidgetRef} />
         </aside>
       </main>
     </>
