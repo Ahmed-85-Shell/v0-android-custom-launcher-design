@@ -224,7 +224,7 @@ function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
   const greeting = hour === undefined ? 'Good day' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   return (
     <>
-      <SideRail onOpen={onOpen} hidden={studentsExpanded} />
+      <SideRail onOpen={onOpen} />
       <main className={`home-layout ${studentsExpanded ? 'student-list-expanded' : ''}`}>
         <section className="hero-copy">
           <p className="eyebrow">NOZHA SCHOOLS <span>·</span> CAIRO</p>
