@@ -64,7 +64,7 @@ function TopBar({ view, setView }: { view: View; setView: (view: View) => void }
   return (
     <header className="topbar glass-panel">
       <button className="brand" onClick={() => setView('Home')} aria-label="Nozha Launcher home">
-        <img className="brand-mark" src="/icon-dark-32x32.png" alt="" />
+        <img className="brand-mark" src="/nozha-school-seal.png" alt="British American National School crest" />
         <span className="brand-copy"><strong>NOZHA</strong><small>LAUNCHER</small></span>
       </button>
       <nav className="topnav" aria-label="Main navigation">
