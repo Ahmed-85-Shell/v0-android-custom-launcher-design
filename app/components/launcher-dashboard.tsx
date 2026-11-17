@@ -33,6 +33,16 @@ import { classInfo, sampleTimetable, students, type Student } from '../data/stud
 
 type View = 'Home' | 'All apps' | 'Students'
 
+const studentQuotes = [
+  { text: 'The beautiful thing about learning is that no one can take it away from you.', author: 'B.B. King' },
+  { text: 'Education is the most powerful weapon which you can use to change the world.', author: 'Nelson Mandela' },
+  { text: 'Learning never exhausts the mind.', author: 'Leonardo da Vinci' },
+  { text: 'An investment in knowledge pays the best interest.', author: 'Benjamin Franklin' },
+  { text: 'The roots of education are bitter, but the fruit is sweet.', author: 'Aristotle' },
+  { text: 'Live as if you were to die tomorrow. Learn as if you were to live forever.', author: 'Mahatma Gandhi' },
+  { text: 'Anyone who has never made a mistake has never tried anything new.', author: 'Albert Einstein' },
+]
+
 const tools = [
   { label: 'Whiteboard', detail: 'Explain Everything', icon: PenTool, color: 'coral' },
   { label: 'Share', detail: 'Screen sharing', icon: MonitorUp, color: 'blue' },
@@ -54,7 +64,8 @@ function TopBar({ view, setView }: { view: View; setView: (view: View) => void }
   return (
     <header className="topbar glass-panel">
       <button className="brand" onClick={() => setView('Home')} aria-label="Nozha Launcher home">
-        <img className="brand-lockup" src="/nozha-launcher-lockup.png" alt="Nozha school crest and launcher wordmark" />
+        <img className="brand-mark" src="/icon-dark-32x32.png" alt="" />
+        <span className="brand-copy"><strong>NOZHA</strong><small>LAUNCHER</small></span>
       </button>
       <nav className="topnav" aria-label="Main navigation">
         {(['Home', 'All apps', 'Students'] as View[]).map((item) => (
@@ -221,6 +232,8 @@ function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
   }, [studentsExpanded])
 
   const hour = now?.getHours()
+  const dayOfYear = now ? Math.floor((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(now.getFullYear(), 0, 0)) / 86_400_000) : 0
+  const dailyQuote = studentQuotes[dayOfYear % studentQuotes.length]
   const greeting = hour === undefined ? 'Good day' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   return (
     <>
@@ -234,7 +247,10 @@ function HomePage({ onOpen }: { onOpen: (label: string) => void }) {
           <div className="hero-divider" />
           <div className="weather-line"><Sun size={20} /><strong>24°</strong><span>Sunny · Cairo</span></div>
           <h1>{greeting}, Nozha learners.</h1>
-          <p className="hero-description">Your classroom is ready. Pick up where learning begins.</p>
+          <blockquote className="daily-quote">
+            <p>“{dailyQuote.text}”</p>
+            <cite>— {dailyQuote.author}</cite>
+          </blockquote>
           <button className="primary-cta" onClick={() => onOpen('Whiteboard')}><PenTool size={17} /> Open Whiteboard <ArrowRight size={16} /></button>
           <div className="gesture-hints"><span><ArrowDownRight size={14} /> Swipe up · App drawer</span><span><MonitorUp size={14} /> Share your screen</span><span><Sparkles size={14} /> Personalize the launcher</span></div>
         </section>
